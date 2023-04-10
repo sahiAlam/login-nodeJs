@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script
+      type="text/javascript"
+      src="https://unpkg.com/webcam-easy/dist/webcam-easy.min.js"
+    ></script>
+  </head>
+  <body>
+    <h1>Data Selfie App</h1>
+
+    <p>Hello!</p>
+
+    <p>
+      Latitude : <span id="lati"></span><span> &deg;</span> <br />
+      Longitude: <span id="longi"></span><span> &deg;</span> <br />
+    </p>
+    <button id="btn">Sent Data</button>
+    <a href="all.html" class="see_data">See Data</a>
+
+    <div class="form_area">
+      <form id="login_form" action="./action.html">
+        <label for="uname">Username : </label>
+        <input
+          type="text"
+          id="uname"
+          autocomplete="off"
+          placeholder="Username"
+        />
+        <br />
+        <label for="password">Password : </label>
+        <input
+          type="password"
+          id="password"
+          autocomplete="off"
+          placeholder="Password"
+        />
+        <br />
+        <input type="submit" id="submit" value="LOGIN" />
+      </form>
+    </div>
+
+    <video id="webcam" autoplay playsinline width="550" height="360"></video>
+    <canvas id="canvas" class="d-none"></canvas>
+    <!-- <audio id="snapSound" src="audio/snap.wav" preload = "auto"></audio> -->
+
+    <script>
+      //   Sent user form details
+
+      const button = document.querySelector("#submit");
+      const uname = document.querySelector("#uname");
+      const password = document.querySelector("#password");
+      const login_form = document.querySelector("#login_form");
+
+      login_form.addEventListener("submit", (e) => {
+        const userName = uname.value;
+        const userPass = password.value;
+        const data = { userName, userPass };
+        return validate(data);
+      });
+
+      const validate = (data) => {
+        if (data.userName.trim() == "" || data.userPass.trim() == "") {
+          alert("Blank value not allowed");
+          return false;
+        } else {
+          options = {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          };
+
+          try {
+            const postData = async () => {
+              const response = await fetch("/login", options);
+              const finalData = await response.json();
+              // console.log(response);
+              // console.log(finalData);
+            };
+            postData();
+          } catch (error) {
+            console.log(error);
+          }
+        }
+      };
+
+      // Latitude and Longitude sent to the SERVER
+      const btn = document.querySelector("#btn");
+      btn.addEventListener("click", async () => {
+        if ("geolocation" in navigator) {
+          console.log("Geolocation available");
+          navigator.geolocation.getCurrentPosition(async (position) => {
+            const latitude = document.querySelector("#lati");
+            const finalLati = position.coords.latitude;
+            latitude.innerHTML = finalLati;
+            const longitude = document.querySelector("#longi");
+            const finalLongi = position.coords.longitude;
+            longitude.innerHTML = finalLongi;
+
+            const data = { finalLati, finalLongi };
+            const options = {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            };
+            const response = await fetch("/api", options);
+            const json = await response.json();
+            console.log(response);
+            console.log(json);
+          });
+        } else {
+          console.log("Geolocation not aavailable");
+        }
+      });
+    </script>
+  </body>
+</html>
